@@ -1,0 +1,10 @@
+Buid a system for student
+1. Students will have to sign up to get a unique student id
+2. Students logs in with email/student ID
+3. Forget password feature
+4. Checks grade by ID and Password
+
+
+Second Task: Build a system for the school admin
+1. Admin sees registerd students with their info (Can be editable)
+2. Takes record of students score
