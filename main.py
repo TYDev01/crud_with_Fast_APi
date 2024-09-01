@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, status, HTTPException
 from typing import Union
 from pydantic import BaseModel
 from fastapi.params import Body
@@ -7,6 +7,7 @@ from random import randrange
 
 app = FastAPI()
 
+# Using Pydantic schema to creat our registeration model
 class AccountCreating(BaseModel):
     firstname: str
     lastname: str
@@ -27,6 +28,13 @@ def get_user_id(id):
     for user in users:
         if user["id"] == id:
             return user
+        
+
+# Getting the user index
+def user_index(id):
+    for i, u in enumerate(users):
+        if u["id"] == id:
+            return i
 
 @app.get("/")
 def home():
@@ -34,7 +42,7 @@ def home():
 
 
 # Post New Users to database
-@app.post("/post")
+@app.post("/user", status_code=status.HTTP_201_CREATED)
 def signup(newuser: AccountCreating):
     list_user = newuser.model_dump()
     list_user["regNum"] = reg
@@ -42,12 +50,19 @@ def signup(newuser: AccountCreating):
     return {"Users": users}
 
 
-
-@app.get("/item/{id}")
+# Getting a user by ID
+@app.get("/user/{id}")
 def get_users(id: int, response: Response):
     user_id = get_user_id(id)
-    if not user_id:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return "User Not Found"
+    if not user_id: # If the ID doesn't exist
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"User with id: {id} not found")
     print(user_id)
     return {"User No": user_id}
+
+
+# Deleting a User
+@app.delete("/user/{id}")
+def delete_user(id: int):
+    user_to_delete = user_index(id)
+    users.pop(user_to_delete)
+    return {"message": "succesfully deleted", "users": users}
