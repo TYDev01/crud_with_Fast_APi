@@ -61,8 +61,10 @@ def get_users(id: int, response: Response):
 
 
 # Deleting a User
-@app.delete("/user/{id}")
+@app.delete("/user/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id: int):
     user_to_delete = user_index(id)
+    if user_to_delete == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the id: {id} not found or already deleted")
     users.pop(user_to_delete)
-    return {"message": "succesfully deleted", "users": users}
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
