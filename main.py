@@ -68,3 +68,16 @@ def delete_user(id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the id: {id} not found or already deleted")
     users.pop(user_to_delete)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# Updating a user info
+
+@app.put("/user/{id}")
+def update_user(id: int, newuser: AccountCreating):
+    index = user_index(id)
+    if index == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the id: {id} not found")
+    user_list = newuser.model_dump()
+    user_list["id"] = id
+    users[index] = user_list
+    return {"data": user_list}
