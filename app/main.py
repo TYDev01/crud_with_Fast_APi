@@ -3,9 +3,28 @@ from typing import Union
 from pydantic import BaseModel
 from fastapi.params import Body
 from random import randrange
+import psycopg
 
 
 app = FastAPI()
+
+# Connecting to Database(postgres)
+with psycopg.connect("dbname=studentAPi user=postgres password=2020 host=localhost") as conn:
+    with conn.cursor() as cur:
+        print("Connected Successfully")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users(
+                    id serial PRIMARY KEY,
+                    firstname character varying,
+                    lastname character varying,
+                    age integer,
+                    email character varying,
+                    address character varying,
+                    created_at timestamp with timezone Default NOW(),
+                    )
+""")
+
+        conn.commit()
 
 # Using Pydantic schema to creat our registeration model
 class AccountCreating(BaseModel):
@@ -50,9 +69,13 @@ def signup(newuser: AccountCreating):
     return {"Users": users}
 
 
+@app.get("/user")
+def get_users():
+    return {"users": users}
+
 # Getting a user by ID
 @app.get("/user/{id}")
-def get_users(id: int, response: Response):
+def get_users_By_Id(id: int, response: Response):
     user_id = get_user_id(id)
     if not user_id: # If the ID doesn't exist
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"User with id: {id} not found")
